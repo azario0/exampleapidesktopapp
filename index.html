@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bienvenue dans l'application de meteo</title>
+    <style>
+      body {
+        font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+          "Lucida Sans", Arial, sans-serif;
+      }
+      .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 20px;
+        background-color: rgb(89, 241, 241);
+        padding: 20px;
+        border-radius: 15px;
+      }
+
+      .container select {
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      #getWilayaButton {
+        padding: 10px 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Bienvenue dans l'application météo</h1>
+      
+
+      <p>Selectionner la wilaya :</p>
+      <select id="wilayaDropdown">
+        <option value="Tlemcen">Tlemcen</option>
+        <option value="Oran">Oran</option>
+        <option value="Alger">Algerie</option>
+      </select>
+      <button id="getWilayaButton">Obtenir la temperature</button>
+
+      <br />
+      <div id="wilaya"></div>
+      <div id="temp"></div>
+      <div id="description"></div>
+      <div id="temp_min"></div>
+      <div id="temp_max"></div>
+    </div>
+
+    <script>
+      const wilayaDropdown = document.getElementById("wilayaDropdown");
+      const getWilayaButton = document.getElementById("getWilayaButton");
+
+      getWilayaButton.addEventListener("click", () => {
+        const selectedWilaya = wilayaDropdown.value;
+
+        pywebview.api
+          .getData(selectedWilaya)
+          .then(function (response) {
+            try {
+              const jsonString = JSON.stringify(response);
+              const parsedData = JSON.parse(jsonString);
+              const weatherDescription = parsedData.weather[0].description;
+              const temperatureInKelvin = parsedData.main.temp;
+
+              const temperature_min_InKelvin = parsedData.main.temp_min;
+              const temperature_max_InKelvin = parsedData.main.temp_max;
+
+              const temperatureInFahrenheit = temperatureInKelvin- 273.15;
+
+              const ville = parsedData.name;
+              
+
+                const temperatureIn_min_Fahrenheit = (temperature_min_InKelvin - 273.15) ;
+                const temperatureIn_max_Fahrenheit = (temperature_max_InKelvin - 273.15) ;
+
+              document.getElementById(
+                "temp"
+              ).innerText = `La temperature est : ${temperatureInFahrenheit.toFixed(
+                2
+              )} °C`;
+
+              document.getElementById(
+                "temp_min"
+              ).innerText = `La temperature min est : ${temperatureIn_min_Fahrenheit.toFixed(
+                2
+              )} °C`;
+              
+              document.getElementById(
+                "temp_max"
+              ).innerText = `La temperature max est : ${temperatureIn_max_Fahrenheit.toFixed(
+                2
+              )} °C`;
+
+              document.getElementById(
+                "description"
+              ).innerHTML = `La description : ${weatherDescription}`;
+
+              document.getElementById(
+                "wilaya"
+              ).innerHTML = `Pour la wilaya : ${ville}`;
+
+            } catch (error) {
+              console.error("Error parsing JSON data:", error);
+              
+            }
+          })
+          .catch(function (error) {
+            console.error("Error fetching data:", error);
+            
+          });
+      });
+    </script>
+  </body>
+</html>
